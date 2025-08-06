@@ -20,6 +20,8 @@ if not exist "%VENV_DIR%" (
 REM
 echo Starting %PACKAGE%...
 call %VENV_DIR%\Scripts\activate.bat
+python -m pip install --upgrade %PACKAGE%
+python -m pip install --upgrade %PACKAGE%
 krypto_gui_smalk
 call deactivate
 

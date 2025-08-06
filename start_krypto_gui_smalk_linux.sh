@@ -17,6 +17,8 @@ else
 fi
 
 echo "Starting $PACKAGE..."
-source $VENV_DIR/bin/activate
+. $VENV_DIR/bin/activate
+pip install --upgrade $PACKAGE
+pip install --upgrade $PACKAGE
 $PACKAGE
 deactivate
