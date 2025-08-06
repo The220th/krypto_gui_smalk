@@ -1,10 +1,10 @@
 # krypto_gui_smalk
 
-gui for smalk krypto testing.
+gui for [smalk krypto](https://github.com/The220th/alerk_pack/blob/main/alerk_pack/crypto.py) testing.
 
 For more details about smalk and alerk look [this](https://github.com/The220th/alerk).
 
-# Installing
+# Installation
 
 ```bash
 pip install --upgrade pip
