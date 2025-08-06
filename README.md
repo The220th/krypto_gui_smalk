@@ -16,3 +16,11 @@ pip3 install krypto_gui_smalk
 ```bash
 krypto_gui_smalk
 ```
+
+Or just run
+
+```bash
+start_krypto_gui_smalk_windows.bat  # windows
+
+bash start_krypto_gui_smalk_linux.sh  # GNU/Linux
+```
