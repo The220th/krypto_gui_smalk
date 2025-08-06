@@ -1,0 +1,8 @@
+venv
+.venv
+.idea
+**/__pycache__
+build
+dist
+krypto_gui_smalk.egg-info
+set.yaml
