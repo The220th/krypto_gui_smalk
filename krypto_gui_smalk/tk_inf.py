@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -37,16 +38,28 @@ class App(tk.Tk):
         self.asym_encrypt_btn: ttk.Button | None = None
         self.asym_decrypt_btn: ttk.Button | None = None
 
+        # File vars
+        self.file_key_entry: ttk.Entry | None = None
+        self.generate_file_key_btn: ttk.Button | None = None
+        self.file_in_entry: ttk.Entry | None = None
+        self.file_out_entry: ttk.Entry | None = None
+        self.file_encrypt_btn: ttk.Button | None = None
+        self.file_decrypt_btn: ttk.Button | None = None
+        self.file_progress_label: ttk.Label | None = None
+
         # Tabs
         self.tab_control = ttk.Notebook(self)
         self.tab_symmetric = ttk.Frame(self.tab_control)
         self.tab_asymmetric = ttk.Frame(self.tab_control)
+        self.tab_file = ttk.Frame(self.tab_control)
         self.tab_control.add(self.tab_symmetric, text="Symmetric")
         self.tab_control.add(self.tab_asymmetric, text="Asymmetric")
+        self.tab_control.add(self.tab_file, text="     File     ")
         self.tab_control.pack(fill=tk.BOTH, expand=True)
 
         self.setup_symmetric_tab()
         self.setup_asymmetric_tab()
+        self.setup_file_tab()
 
     def setup_symmetric_tab(self):
         tab = self.tab_symmetric
@@ -201,6 +214,78 @@ class App(tk.Tk):
         )
         self.asym_decrypt_btn.pack(side=tk.LEFT)
 
+    def setup_file_tab(self):
+        tab = self.tab_file
+
+        # Key section
+        key_frame = ttk.Frame(tab, padding=5)
+        key_frame.pack(fill=tk.X)
+
+        ttk.Label(key_frame, text="Key:").pack(side=tk.LEFT)
+        self.file_key_entry = ttk.Entry(key_frame, width=55)
+        self.file_key_entry.pack(side=tk.LEFT, padx=5)
+
+        self.file_key_entry.bind("<Control-a>", lambda e: self._select_all_entry(self.file_key_entry))
+        self.file_key_entry.bind("<Control-A>", lambda e: self._select_all_entry(self.file_key_entry))
+        self.file_key_entry.bind("<Control-v>", lambda e: self._paste_over_selection_entry(self.file_key_entry))
+        self.file_key_entry.bind("<Control-V>", lambda e: self._paste_over_selection_entry(self.file_key_entry))
+
+        self.generate_file_key_btn = ttk.Button(
+            key_frame,
+            text="Generate",
+            command=self.generate_file_key,
+            width=10
+        )
+        self.generate_file_key_btn.pack(side=tk.LEFT)
+
+        # File fields section
+        file_frame = ttk.Frame(tab, padding=5)
+        file_frame.pack(fill=tk.X)
+
+        ttk.Label(file_frame, text="File in:").pack(anchor=tk.W)
+        self.file_in_entry = ttk.Entry(file_frame, width=55)
+        self.file_in_entry.pack(fill=tk.X, padx=5)
+
+        ttk.Label(file_frame, text="File out:").pack(anchor=tk.W)
+        self.file_out_entry = ttk.Entry(file_frame, width=55)
+        self.file_out_entry.pack(fill=tk.X, padx=5)
+
+        self.file_in_entry.bind("<Control-a>", lambda e: self._select_all_entry(self.file_in_entry))
+        self.file_in_entry.bind("<Control-A>", lambda e: self._select_all_entry(self.file_in_entry))
+        self.file_in_entry.bind("<Control-v>", lambda e: self._paste_over_selection_entry(self.file_in_entry))
+        self.file_in_entry.bind("<Control-V>", lambda e: self._paste_over_selection_entry(self.file_in_entry))
+
+        self.file_out_entry.bind("<Control-a>", lambda e: self._select_all_entry(self.file_out_entry))
+        self.file_out_entry.bind("<Control-A>", lambda e: self._select_all_entry(self.file_out_entry))
+        self.file_out_entry.bind("<Control-v>", lambda e: self._paste_over_selection_entry(self.file_out_entry))
+        self.file_out_entry.bind("<Control-V>", lambda e: self._paste_over_selection_entry(self.file_out_entry))
+
+        # Buttons
+        button_frame = ttk.Frame(tab, padding=5)
+        button_frame.pack(fill=tk.X)
+
+        self.file_encrypt_btn = ttk.Button(
+            button_frame,
+            text="Encrypt",
+            command=self.sym_encrypt_file,
+            width=10
+        )
+        self.file_encrypt_btn.pack(side=tk.LEFT, padx=2)
+
+        self.file_decrypt_btn = ttk.Button(
+            button_frame,
+            text="Decrypt",
+            command=self.sym_decrypt_file,
+            width=10
+        )
+        self.file_decrypt_btn.pack(side=tk.LEFT)
+
+        # Progress
+        progress_frame = ttk.Frame(tab, padding=5)
+        progress_frame.pack(fill=tk.X)
+        self.file_progress_label = ttk.Label(progress_frame, text="")
+        self.file_progress_label.pack(side=tk.LEFT)
+
     def _select_all_entry(self, entry_widget):
         entry_widget.select_range(0, tk.END)
         return "break"
@@ -210,8 +295,22 @@ class App(tk.Tk):
         return "break"
 
     def _paste_over_selection_entry(self, entry_widget):
-        entry_widget.delete(0, tk.END)
-        entry_widget.insert(0, self.clipboard_get())
+        # entry_widget.delete(0, tk.END)
+        # entry_widget.insert(0, self.clipboard_get())
+
+        # cursor_position = entry_widget.index(tk.INSERT)
+        # clipboard_text = self.clipboard_get()
+        # entry_widget.insert(cursor_position, clipboard_text)
+
+        cursor_position = entry_widget.index(tk.INSERT)
+        clipboard_text = self.clipboard_get()
+        selected_text = entry_widget.selection_get() if entry_widget.selection_present() else ""
+        if selected_text:
+            start_index = entry_widget.index(tk.SEL_FIRST)
+            end_index = entry_widget.index(tk.SEL_LAST)
+            entry_widget.delete(start_index, end_index)
+        entry_widget.insert(cursor_position, clipboard_text)
+
         return "break"
 
     def _paste_over_selection_text(self, event):
@@ -362,3 +461,104 @@ class App(tk.Tk):
             return
 
         self.paste_text_to_output(self.asym_output_text, f"{text}")
+
+    def generate_file_key(self):
+        try:
+            file_key = gen_sym_key()
+            file_key_str = sym_key_to_str(file_key)
+        except Exception as e:
+            messagebox.showerror("Error", f"Cannot generate key: {e}")
+            return
+
+        self.file_key_entry.delete(0, tk.END)
+        self.file_key_entry.insert(0, f"{file_key_str}")
+
+    def sym_encrypt_file(self):
+        key_str = self.file_key_entry.get().strip()
+        file_in_path = self.file_in_entry.get().strip()
+        file_out_path = self.file_out_entry.get().strip()
+        if key_str == "":
+            messagebox.showerror("Error", "Input or generate key first")
+            return
+        if file_in_path == "":
+            messagebox.showerror("Error", "Input file in")
+            return
+        if file_out_path == "":
+            messagebox.showerror("Error", "Input file out")
+            return
+        if not os.path.isfile(file_in_path):
+            messagebox.showerror("Error", f"No such file: \"{file_in_path}\"")
+            return
+        elif os.path.isdir(file_in_path):
+            messagebox.showerror("Error", f"File \"{file_in_path}\" is directory. ")
+            return
+
+        try:
+            key = str_to_sym_key(key_str)
+        except Exception as e:
+            messagebox.showerror("Error", f"Cannot form key: {e}")
+            return
+
+        self.file_progress_label.config(text="Encrypting...")
+        self.update_idletasks()
+
+        try:
+            with open(file_in_path, 'rb') as fd:
+                bs = fd.read()
+            bs_en: bytes = sym_encrypt(bs, key)
+            with open(file_out_path, 'wb') as fd:
+                fd.write(bs_en)
+                fd.flush()
+        except Exception as e:
+            self.file_progress_label.config(text="Error")
+            self.update_idletasks()
+            messagebox.showerror("Error", f"Cannot encrypt: {e}")
+            return
+
+        self.file_progress_label.config(text="Done!")
+        self.update_idletasks()
+
+    def sym_decrypt_file(self):
+        key_str = self.file_key_entry.get().strip()
+        file_in_path = self.file_in_entry.get().strip()
+        file_out_path = self.file_out_entry.get().strip()
+        if key_str == "":
+            messagebox.showerror("Error", "Input or generate key first")
+            return
+        if file_in_path == "":
+            messagebox.showerror("Error", "Input file in")
+            return
+        if file_out_path == "":
+            messagebox.showerror("Error", "Input file out")
+            return
+        if not os.path.isfile(file_in_path):
+            messagebox.showerror("Error", f"No such file: \"{file_in_path}\"")
+            return
+        elif os.path.isdir(file_in_path):
+            messagebox.showerror("Error", f"File \"{file_in_path}\" is directory. ")
+            return
+
+        try:
+            key = str_to_sym_key(key_str)
+        except Exception as e:
+            messagebox.showerror("Error", f"Cannot form key: {e}")
+            return
+
+        self.file_progress_label.config(text="Decrypting...")
+        self.update_idletasks()
+
+        try:
+            with open(file_in_path, 'rb') as fd:
+                bs_en = fd.read()
+            bs: bytes = sym_decrypt(bs_en, key)
+            with open(file_out_path, 'wb') as fd:
+                fd.write(bs)
+                fd.flush()
+        except Exception as e:
+            self.file_progress_label.config(text="Error")
+            self.update_idletasks()
+            messagebox.showerror("Error", f"Cannot decrypt: {e}")
+            return
+
+        self.file_progress_label.config(text="Done!")
+        self.update_idletasks()

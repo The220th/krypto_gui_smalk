@@ -2,6 +2,9 @@
 
 gui for [smalk krypto](https://github.com/The220th/alerk_pack/blob/main/alerk_pack/crypto.py) testing.
 
+> [!WARNING]
+> This project has not been audited for security.
+
 For more details about smalk and alerk look [this](https://github.com/The220th/alerk).
 
 # Installation
